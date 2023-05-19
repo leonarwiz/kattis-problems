@@ -59,7 +59,7 @@ vector<point> convex_hull(vector<point> points){
     swap(points[0], points[idx_bottom_right]);
     origin = bottom_right;
 
-    sort(points.begin()+1, points.end());
+    sort(points.begin()+1, points.end(), compare_angles);
 
     vector<point> st;
     st.push_back(points[0]);
@@ -102,11 +102,12 @@ ll getArea(vector<point> hull, ll lo, ll mi, ll hi){
     area += (a.x*b.y + b.x*c.y + c.x*a.y);
     area -= (a.x*c.y + c.x*b.y + b.x*a.y); 
 
-    return area;
+    return abs(area);
 }
 
 int main(){
     ll n;
+    cin >> n;
     set<point> pointSet;
     while(n--){
         point p;
@@ -115,29 +116,43 @@ int main(){
     }   
     vector<point> points(pointSet.begin(), pointSet.end());
     vector<point> hull = convex_hull(points);
-    n = points.size();
+    n = hull.size();
 
     ll maxArea = 0;
     // For each start point
     for(ll lo = 0; lo < n; lo++) {
-        ll mi = lo+1;
+        ll hi = (lo + 1) % n;
+
+        // Initial mid points
+        ll mid1 = (hi + 1) % n;
+        ll mid2 = (mid1 + 1) % n;
 
         // For each end point
-        for(ll k = 0; k < n-2; k++) {
-            ll hi = lo + k + 2;
+        while (hi != lo) {
+            hi = (hi + 1) % n;
 
-            ll area = getArea(hull, lo, mi, hi);
-            while(true) {
-                mi++;
-                ll newarea = getArea(hull, lo, mi, hi);
-                if(newarea <= area || mi >= hi) {
+            // Find the point that forms the maximum area triangle with lo and hi
+            while (true) {
+                ll next_mid = (mid1 + 1) % n;
+                if (getArea(hull, lo, next_mid, hi) > getArea(hull, lo, mid1, hi)) {
+                    mid1 = next_mid;
+                } else {
                     break;
                 }
-                area = newarea;
             }
 
-            mi = max(lo+1, mi-2);
-            maxArea= max(maxArea, area);
+            // Check mid2 similarly
+            while (true) {
+                ll next_mid = (mid2 + 1) % n;
+                if (getArea(hull, lo, next_mid, hi) > getArea(hull, lo, mid2, hi)) {
+                    mid2 = next_mid;
+                } else {
+                    break;
+                }
+            }
+
+            // Take the maximum of the two
+            maxArea = max(maxArea, max(getArea(hull, lo, mid1, hi), getArea(hull, lo, mid2, hi)));
         }
     }
 
