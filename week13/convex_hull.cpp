@@ -2,6 +2,7 @@
 #include<cmath>
 #include<algorithm>
 #include<iostream>
+#include<set>
 
 using namespace std;
 
@@ -65,14 +66,14 @@ vector<point> convex_hull(vector<point> points){
 }
 
 long long cross_product(const point& a, const point& b){
-    return a.first * b.second - a.second * b.first;
+    return 1LL*a.first * b.second -1LL* a.second * b.first;
 }
 
 bool convex(const point& a, const point& b, const point& c){
     const point ab = make_pair(b.first - a.first, b.second - a.second);
     const point bc = make_pair(c.first - b.first, c.second - b.second);
 
-    return cross_product(ab, bc);
+    return cross_product(ab, bc) > 0;
 }
 
 bool compare_angles(const point& a, const point& b){
@@ -88,4 +89,24 @@ bool compare_angles(const point& a, const point& b){
 
         return distA < distB;
      }
+}
+
+int main(){
+    int n;
+    while(cin >> n && n != 0){
+        set<point> pointSet;
+        while(n--){
+            point p ;
+            cin >> p.first >> p.second ;
+            pointSet.insert(p);
+        }
+
+        vector<point> points(pointSet.begin(), pointSet.end());
+
+        vector<point> res = convex_hull(points);
+        printf("%d\n", res.size());
+        for(auto p : res){
+            printf("%d %d\n", p.first, p.second);
+        }
+    }
 }
